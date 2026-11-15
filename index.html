@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="bn" id="htmlRoot" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Mega Lottery - গ্লোবাল লটারি সাইট</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 dark:bg-slate-950 dark:text-slate-100 bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-between relative transition-colors duration-300">
+
+    <!-- Top Live Ticker -->
+    <div class="bg-gradient-to-r from-amber-600 via-purple-600 to-indigo-600 text-xs py-2 px-4 overflow-hidden whitespace-nowrap shadow-md text-white">
+        <div id="adminNoticeTicker" class="inline-block animate-pulse font-medium">
+            🔥 গ্লোবাল মেগা লটারি ড্র চলছে! এখনই আপনার পছন্দের প্যাকেজ কিনে জিতে নিন কোটি টাকা!
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="bg-slate-900/90 dark:bg-slate-900/90 bg-white/90 backdrop-blur-md border-b border-slate-800 dark:border-slate-800 border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="showMainView()">
+                <i class="fa-solid fa-ticket text-amber-400 text-2xl"></i>
+                <span class="text-xl font-black tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">GLOBAL LOTTO</span>
+            </div>
+            
+            <div class="flex items-center space-x-2 md:space-x-3">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="bg-slate-800 dark:bg-slate-800 bg-slate-200 text-amber-400 p-2 rounded-lg text-xs font-bold transition border border-slate-700">
+                    <i id="themeIcon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Language Switcher -->
+                <select id="langSelector" onchange="changeLanguage()" class="bg-slate-800 dark:bg-slate-800 bg-slate-200 text-slate-200 dark:text-slate-200 text-xs font-bold px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+                    <option value="bn">🇧🇩 বাংলা</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+
+                <select id="currencySelector" onchange="changeCurrency()" class="bg-slate-800 dark:bg-slate-800 bg-slate-200 text-amber-400 text-xs font-bold px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+                    <option value="BDT">BDT (৳)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="SAR">SAR (﷼)</option>
+                    <option value="AED">AED (د.إ)</option>
+                </select>
+
+                <!-- Spin Wheel Button -->
+                <button onclick="openSpinModal()" class="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold animate-pulse shadow">
+                    <i class="fa-solid fa-dharmachakra mr-1"></i> <span data-i18n="spinBtn">স্পিন হুইল</span>
+                </button>
+
+                <!-- Client Notification Bell -->
+                <div onclick="openClientNotifications()" class="relative bg-slate-800 dark:bg-slate-800 bg-slate-200 cursor-pointer p-2 rounded-full border border-slate-700 flex items-center justify-center transition">
+                    <i class="fa-solid fa-bell text-amber-400 text-sm"></i>
+                    <span id="notifBadge" class="absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+                </div>
+
+                <div onclick="openUserDashboard()" class="bg-slate-800 dark:bg-slate-800 bg-slate-200 cursor-pointer px-3 py-1.5 rounded-full border border-slate-700 hidden sm:flex items-center space-x-2 transition">
+                    <i class="fa-solid fa-wallet text-emerald-400"></i>
+                    <span class="text-xs text-slate-400" data-i18n="balanceLabel">ব্যালেন্স:</span>
+                    <span id="userBalance" class="font-bold text-emerald-400" data-bdt="15500">৳১৫,৫০০</span>
+                </div>
+
+                <div id="headerAuthArea" class="flex items-center space-x-2">
+                    <button onclick="openSignInModal()" class="bg-slate-800 dark:bg-slate-800 bg-slate-200 text-slate-200 dark:text-slate-200 text-slate-800 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border border-slate-700" data-i18n="signIn">সাইন ইন</button>
+                    <button onclick="openSignUpModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow" data-i18n="signUp">সাইন আপ</button>
+                </div>
+
+                <button onclick="openAdminLoginModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center shadow"><i class="fa-solid fa-shield-halved mr-1"></i> <span data-i18n="admin">অ্যাডমিন</span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Floating WhatsApp Bubble -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button onclick="alert('WhatsApp Support: +8801994500030')" class="bg-emerald-600 hover:bg-emerald-500 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 animate-bounce">
+            <i class="fa-brands fa-whatsapp"></i>
+        </button>
+    </div>
+
+    <!-- Main Content Container -->
+    <main id="mainContainer" class="max-w-7xl mx-auto px-4 py-6 space-y-10 flex-grow w-full">
+
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-br from-indigo-900/60 via-purple-900/40 to-slate-900 border border-purple-500/30 rounded-2xl p-6 md:p-10 shadow-2xl relative overflow-hidden text-center text-white">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl"><i class="fa-solid fa-trophy"></i></div>
+            <span class="bg-amber-500/20 text-amber-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-amber-500/30">গ্লোবাল মেগা ড্র #৮৪২</span>
+            <h1 class="text-3xl md:text-5xl font-extrabold mt-4 mb-2"><span data-i18n="megaPool">মেগা প্রাইজ পুল:</span> <span class="text-amber-400">৳৫,০০,০০,০০০+</span></h1>
+            <p class="text-slate-300 text-sm md:text-base max-w-xl mx-auto mb-6" data-i18n="heroDesc">১ম প্যাকেজ শুরু মাত্র ৳১,২৯৯ থেকে! কার্ড স্ক্র্যাচ করে দেখুন আপনার ভাগ্যে কত টাকা রয়েছে।</p>
+            
+            <button onclick="scrollToSection('packagesSection')" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold px-8 py-3 rounded-xl shadow-lg transition transform hover:scale-105">
+                <i class="fa-solid fa-gift mr-2"></i> <span data-i18n="viewPackages">প্যাকেজগুলো দেখুন</span>
+            </button>
+        </section>
+
+        <!-- Stats Bar -->
+        <section class="relative z-20">
+            <div class="bg-slate-900/90 dark:bg-slate-900/90 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-4 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="border-r border-slate-800 last:border-none">
+                    <span class="text-slate-400 text-xs block mb-1" data-i18n="activeUsers">অনলাইন অ্যাক্টিভ ইউজার</span>
+                    <h4 id="liveOnlineCount" class="text-xl font-black text-emerald-400">১,৭৫০ জন</h4>
+                </div>
+                <div class="border-r border-slate-800 last:border-none">
+                    <span class="text-slate-400 text-xs block mb-1" data-i18n="totalMembers">মোট রেজিস্টার্ড মেম্বার</span>
+                    <h4 id="registeredMembersCount" class="text-xl font-black text-amber-400">৫০,৮২০+</h4>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs block mb-1" data-i18n="refBonus">রেফারেল বোনাস</span>
+                    <h4 class="text-xl font-black text-emerald-400">৳৫০০ প্রতি রেফার</h4>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lottery Packages -->
+        <section id="packagesSection" class="space-y-6">
+            <div class="text-center">
+                <h2 class="text-2xl font-black mb-2 flex items-center justify-center">
+                    <i class="fa-solid fa-layer-group text-amber-400 mr-2"></i> <span data-i18n="pkgTitle">লটারি কার্ড প্যাকেজসমূহ (৳১,২৯৯ থেকে শুরু)</span>
+                </h2>
+                <p class="text-slate-400 text-sm" data-i18n="pkgDesc">আপনার পছন্দের প্যাকেজ সিলেক্ট করুন এবং আবেদন করুন।</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                <div class="bg-slate-900/80 dark:bg-slate-900/80 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-5 flex flex-col justify-between shadow-xl transition">
+                    <div>
+                        <span class="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">স্টার্টার প্যাক</span>
+                        <h3 class="text-lg font-bold mt-3">১০টি লাকি কার্ড</h3>
+                        <div class="my-4"><span class="text-2xl font-black text-amber-400 price-tag" data-bdt="1299">৳১,২৯৯</span></div>
+                    </div>
+                    <button onclick="openPurchaseModal('স্টার্টার প্যাক', 1299, 10, 'starter')" class="w-full bg-slate-800 dark:bg-slate-800 bg-slate-200 hover:bg-amber-500 hover:text-slate-950 font-bold py-2 rounded-xl text-xs transition border border-slate-700">প্যাকেজ কিনুন</button>
+                </div>
+                <div class="bg-slate-900/80 dark:bg-slate-900/80 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-5 flex flex-col justify-between shadow-xl transition">
+                    <div>
+                        <span class="bg-purple-900/40 text-purple-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase border border-purple-500/30">ব্রোঞ্জ প্যাক</span>
+                        <h3 class="text-lg font-bold mt-3">১৮টি লাকি কার্ড</h3>
+                        <div class="my-4"><span class="text-2xl font-black text-amber-400 price-tag" data-bdt="2499">৳২,৪৯৯</span></div>
+                    </div>
+                    <button onclick="openPurchaseModal('ব্রোঞ্জ প্যাক', 2499, 18, 'bronze')" class="w-full bg-slate-800 dark:bg-slate-800 bg-slate-200 hover:bg-amber-500 hover:text-slate-950 font-bold py-2 rounded-xl text-xs transition border border-slate-700">প্যাকেজ কিনুন</button>
+                </div>
+                <div class="bg-slate-900/80 dark:bg-slate-900/80 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-5 flex flex-col justify-between shadow-xl transition">
+                    <div>
+                        <span class="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">সিলভার প্যাক</span>
+                        <h3 class="text-lg font-bold mt-3">২৫টি লাকি কার্ড</h3>
+                        <div class="my-4"><span class="text-2xl font-black text-amber-400 price-tag" data-bdt="4999">৳৪,৯৯৯</span></div>
+                    </div>
+                    <button onclick="openPurchaseModal('সিলভার প্যাক', 4999, 25, 'silver')" class="w-full bg-slate-800 dark:bg-slate-800 bg-slate-200 hover:bg-amber-500 hover:text-slate-950 font-bold py-2 rounded-xl text-xs transition border border-slate-700">প্যাকেজ কিনুন</button>
+                </div>
+                <div class="bg-slate-900/80 dark:bg-slate-900/80 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-5 flex flex-col justify-between shadow-xl transition">
+                    <div>
+                        <span class="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">গোল্ড প্যাক</span>
+                        <h3 class="text-lg font-bold mt-3">৫৫টি লাকি কার্ড</h3>
+                        <div class="my-4"><span class="text-2xl font-black text-amber-400 price-tag" data-bdt="8999">৳৮,৯৯৯</span></div>
+                    </div>
+                    <button onclick="openPurchaseModal('গোল্ড প্যাক', 8999, 55, 'gold')" class="w-full bg-slate-800 dark:bg-slate-800 bg-slate-200 hover:bg-amber-500 hover:text-slate-950 font-bold py-2 rounded-xl text-xs transition border border-slate-700">প্যাকেজ কিনুন</button>
+                </div>
+                <div class="bg-slate-900/80 dark:bg-slate-900/80 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-5 flex flex-col justify-between shadow-xl transition">
+                    <div>
+                        <span class="bg-slate-800 text-slate-300 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase">প্লাটিনাম প্যাক</span>
+                        <h3 class="text-lg font-bold mt-3">১১০টি লাকি কার্ড</h3>
+                        <div class="my-4"><span class="text-2xl font-black text-amber-400 price-tag" data-bdt="14999">৳১৪,৯৯৯</span></div>
+                    </div>
+                    <button onclick="openPurchaseModal('প্লাটিনাম প্যাক', 14999, 110, 'platinum')" class="w-full bg-slate-800 dark:bg-slate-800 bg-slate-200 hover:bg-amber-500 hover:text-slate-950 font-bold py-2 rounded-xl text-xs transition border border-slate-700">প্যাকেজ কিনুন</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deposit & Withdrawal Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-900/70 dark:bg-slate-900/70 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold flex items-center text-emerald-400"><i class="fa-solid fa-arrow-down mr-2"></i> আন্তর্জাতিক ডিপোজিট</h3>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <select id="depositCountry" onchange="loadDepositBanks()" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                        <option value="">-- দেশ সিলেক্ট করুন --</option>
+                        <option value="Bangladesh">🇧🇩 বাংলাদেশ</option>
+                        <option value="USA">🇺🇸 USA</option>
+                        <option value="Saudi Arabia">🇸🇦 সৌদি আরব</option>
+                        <option value="UAE">🇦🇪 ইউএই</option>
+                    </select>
+                    <div id="depositBankContainer" class="bg-slate-950 p-3 rounded-xl border border-slate-800 hidden space-y-2">
+                        <div id="depositBankDetails" class="text-slate-300"></div>
+                    </div>
+                    <input type="text" id="depAccName" placeholder="প্রেরকের নাম" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <input type="text" id="depAccNumber" placeholder="অ্যাকাউন্ট নম্বর" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <input type="number" id="depAmount" placeholder="পরিমাণ (BDT)" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <input type="text" id="depTrxId" placeholder="TrxID" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <button onclick="submitDepositRequest()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl">ডিপোজিট সাবমিট করুন</button>
+                </div>
+            </div>
+
+            <div class="bg-slate-900/70 dark:bg-slate-900/70 bg-white border border-slate-800 dark:border-slate-800 border-slate-200 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="text-lg font-bold flex items-center text-amber-400"><i class="fa-solid fa-arrow-up mr-2"></i> আন্তর্জাতিক উইথড্র</h3>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <select id="withdrawCountry" onchange="loadWithdrawBanks()" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                        <option value="">-- দেশ সিলেক্ট করুন --</option>
+                        <option value="Bangladesh">🇧🇩 বাংলাদেশ</option>
+                        <option value="USA">🇺🇸 USA</option>
+                        <option value="Saudi Arabia">🇸🇦 সৌদি আরব</option>
+                        <option value="UAE">🇦🇪 ইউএই</option>
+                    </select>
+                    <div id="withdrawBankContainer" class="bg-slate-950 p-3 rounded-xl border border-slate-800 hidden">
+                        <div id="withdrawBankDetails"></div>
+                    </div>
+                    <input type="text" id="wdBankName" placeholder="ব্যাংকের নাম" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <input type="text" id="wdAccNumber" placeholder="অ্যাকাউন্ট নম্বর / IBAN" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <input type="number" id="wdAmount" placeholder="উত্তোলনের পরিমাণ" class="w-full bg-slate-950 dark:bg-slate-950 bg-slate-100 border border-slate-700 rounded-lg px-3 py-2">
+                    <button onclick="submitWithdrawRequest()" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl">উইথড্র সাবমিট করুন (ওটিপি সহ)</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- PURCHASE MODAL -->
+    <div id="purchaseModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-amber-400">প্যাকেজ আবেদন ও ছবি আপলোড</h3>
+                <button onclick="closePurchaseModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <input type="text" id="buyerName" placeholder="পূর্ণ নাম" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <input type="text" id="buyerPhone" placeholder="মোবাইল নম্বর" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <input type="file" id="buyerImageFile" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs">
+                <button onclick="submitPackageApplication()" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl">আবেদন পাঠান</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DAILY SPIN WHEEL MODAL -->
+    <div id="spinModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-pink-500/50 rounded-3xl p-6 w-full max-w-md text-center space-y-4 shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-pink-400"><i class="fa-solid fa-dharmachakra mr-2"></i> ডেইলি লাকি স্পিন হুইল</h3>
+                <button onclick="closeSpinModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="py-6">
+                <div id="wheelBox" class="w-40 h-40 mx-auto rounded-full border-8 border-pink-500 flex items-center justify-center bg-gradient-to-tr from-purple-600 to-pink-600 text-white font-black text-xl shadow-2xl transition-transform duration-1000">
+                    <span id="spinResultText">স্পিন করুন!</span>
+                </div>
+            </div>
+            <button onclick="spinTheWheel()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-3 rounded-xl shadow-lg">ভাগ্য পরীক্ষা করুন (Spin)</button>
+        </div>
+    </div>
+
+    <!-- OTP VERIFICATION MODAL -->
+    <div id="otpModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-2xl p-6 w-full max-w-sm text-center space-y-4 shadow-2xl">
+            <h3 class="text-base font-bold text-amber-400">সিকিউরিটি ওটিপি (OTP) ভেরিফিকেশন</h3>
+            <p class="text-xs text-slate-300">আপনার মোবাইল নম্বরে পাঠানো ৪-ডিজিটের কোডটি দিন। <br><span class="text-emerald-400 font-bold">(ডেমো কোড: 1234)</span></p>
+            <input type="text" maxlength="4" id="otpInput" placeholder="1234" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-3 text-center text-xl tracking-widest text-amber-400 font-bold">
+            <button onclick="verifyOtpCode()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs">ভেরিফাই করুন</button>
+        </div>
+    </div>
+
+    <!-- USER DASHBOARD (VIP Tier, Referral, History) -->
+    <div id="userDashboardModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-emerald-500/50 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-emerald-400"><i class="fa-solid fa-user-gear mr-2"></i> ইউজার ড্যাশবোর্ড ও ভিআইপি স্ট্যাটাস</h3>
+                <button onclick="closeUserDashboard()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <!-- VIP Tier Status Card -->
+            <div class="bg-gradient-to-r from-amber-600/30 to-purple-600/30 border border-amber-500/40 p-4 rounded-xl flex justify-between items-center">
+                <div>
+                    <span class="text-xs text-amber-300 font-bold uppercase">আপনার ভিআইপি লেভেল</span>
+                    <h4 id="vipTierName" class="text-xl font-black text-white">🌟 সিলভার মেম্বার (Silver VIP)</h4>
+                </div>
+                <div class="text-right text-xs text-slate-300">
+                    <p>ক্যাশব্যাক বোনাস: <strong class="text-emerald-400">৫%</strong></p>
+                </div>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <h4 class="font-bold text-amber-400">লাইভ রেফারেল ট্র্যাকিং</h4>
+                <p class="text-slate-300">রেফার লিংক: <span class="text-emerald-400 font-mono">https://globallotto.com/ref/user1550</span></p>
+                <p>মোট রেফার: <strong id="refCount" class="text-white">২ জন</strong> | অর্জিত বোনাস: <strong id="refEarned" class="text-emerald-400">৳১,০০০</strong></p>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+                <h4 class="font-bold text-amber-400">টিকেট ও পারচেজ হিস্ট্রি</h4>
+                <div id="ticketHistoryList" class="space-y-1 text-slate-300 max-h-32 overflow-y-auto">
+                    <p class="text-slate-500">কোনো হিস্ট্রি নেই।</p>
+                </div>
+            </div>
+            <button onclick="closeUserDashboard()" class="w-full bg-slate-800 text-slate-200 font-bold py-2 rounded-xl text-xs">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <!-- CLIENT NOTIFICATIONS -->
+    <div id="clientNotifModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-amber-400">নোটিফিকেশনসমূহ</h3>
+                <button onclick="closeClientNotifications()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="clientNotifList" class="space-y-2 max-h-60 overflow-y-auto text-xs">
+                <p class="text-slate-500 text-center py-4">কোনো নোটিফিকেশন নেই।</p>
+            </div>
+            <button onclick="closeClientNotifications()" class="w-full bg-slate-800 text-slate-200 font-bold py-2 rounded-xl text-xs">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <!-- GAME VIEW -->
+    <div id="checkoutView" class="max-w-4xl mx-auto px-4 py-10 flex-grow w-full hidden">
+        <div class="bg-slate-900 border border-amber-500/40 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h2 class="text-xl font-bold text-amber-400">প্যাকেজ কার্ড স্ক্র্যাচ গেম</h2>
+                <button onclick="showMainView()" class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-lg">← ফিরে যান</button>
+            </div>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center text-sm">
+                <div><span>নির্বাচিত প্যাক:</span> <strong id="activePkgName" class="text-white">-</strong></div>
+                <div><span>মূল্য:</span> <strong id="activePkgPrice" class="text-amber-400">-</strong></div>
+            </div>
+            <div id="packageCardsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-h-[400px] overflow-y-auto p-2 bg-slate-950 rounded-xl"></div>
+            <div class="text-center pt-2">
+                <button onclick="openFinalCertificate()" class="bg-amber-500 text-slate-950 font-bold px-6 py-2.5 rounded-xl text-xs">উইনিং সার্টিফিকেট দেখুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CERTIFICATE MODAL -->
+    <div id="certificateModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl p-6 w-full max-w-lg text-center space-y-5 shadow-2xl relative">
+            <h4 class="text-2xl font-black text-amber-400">GLOBAL LOTTO CHAMPION</h4>
+            <p class="text-xs text-emerald-400">ভেরিফিকেশন আইডি: <span id="certVerifyId" class="text-amber-300 font-mono">LOTTO-84295</span></p>
+            <p class="text-xs text-slate-300">অর্জিত প্রাইজ: <span id="certPrizeAmount" class="text-emerald-400 font-bold text-lg">৳০</span></p>
+            <button onclick="closeCertificate()" class="w-full bg-slate-800 text-slate-200 font-bold py-2.5 rounded-xl text-xs">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <!-- SIGN UP MODAL -->
+    <div id="signUpModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-amber-400">নতুন অ্যাকাউন্ট সাইন আপ (OTP সহ)</h3>
+                <button onclick="closeSignUpModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <input type="text" id="suName" placeholder="পূর্ণ নাম" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <input type="text" id="suPhone" placeholder="মোবাইল নম্বর" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <input type="password" id="suPassword" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ ডিজিট)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <input type="password" id="suConfirmPassword" placeholder="কনফার্ম পাসওয়ার্ড" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <button onclick="triggerSignUpOtp()" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl">ওটিপি কোড পাঠান</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIGN IN MODAL -->
+    <div id="signInModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-blue-500/50 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-blue-400">সাইন ইন</h3>
+                <button onclick="closeSignInModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <input type="text" id="siPhone" placeholder="মোবাইল নম্বর" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <input type="password" id="siPassword" placeholder="পাসওয়ার্ড" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2">
+                <button onclick="handleSignIn()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl">লগইন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-purple-500/50 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl text-center">
+            <input type="password" id="adminPasswordInput" placeholder="Mehedi12@#" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-center tracking-widest">
+            <button onclick="verifyAdminPassword()" class="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs">লগইন</button>
+        </div>
+    </div>
+
+    <!-- FULL CONTROL ADMIN PANEL -->
+    <div id="adminModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-purple-500/50 rounded-2xl p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-purple-400">অ্যাডমিন ড্যাশবোর্ড</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="space-y-3">
+                <h4 class="text-sm font-bold text-amber-400">প্যাকেজ আবেদন</h4>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-x-auto p-3">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="border-b border-slate-800">
+                            <tr><th class="p-2">ইউজার</th><th class="p-2">প্যাকেজ</th><th class="p-2">মূল্য</th><th class="p-2 text-right">অ্যাকশন</th></tr>
+                        </thead>
+                        <tbody id="adminPackageRequestsTable"><tr><td colspan="4" class="p-4 text-center text-slate-500">কোনো আবেদন নেই</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <h4 class="text-sm font-bold text-emerald-400">ডিপোজিট রিকোয়েস্ট</h4>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-x-auto p-3">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="border-b border-slate-800">
+                            <tr><th class="p-2">দেশ</th><th class="p-2">TrxID</th><th class="p-2">পরিমাণ</th><th class="p-2 text-right">অ্যাকশন</th></tr>
+                        </thead>
+                        <tbody id="adminDepositTable"><tr><td colspan="4" class="p-4 text-center text-slate-500">কোনো রিকোয়েস্ট নেই</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <h4 class="text-sm font-bold text-amber-400">উইথড্র রিকোয়েস্ট</h4>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-x-auto p-3">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="border-b border-slate-800">
+                            <tr><th class="p-2">দেশ</th><th class="p-2">অ্যাকাউন্ট</th><th class="p-2">পরিমাণ</th><th class="p-2 text-right">অ্যাকশন</th></tr>
+                        </thead>
+                        <tbody id="adminWithdrawTable"><tr><td colspan="4" class="p-4 text-center text-slate-500">কোনো রিকোয়েস্ট নেই</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <button onclick="closeAdminModal()" class="w-full bg-slate-800 text-slate-200 py-2 rounded-lg text-xs">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 mt-12 py-6 px-4 text-center text-xs text-slate-500">
+        <p>&copy; ২০২৬ গ্লোবাল লটারি সাইট। সর্বস্বত্ব সংরক্ষিত।</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

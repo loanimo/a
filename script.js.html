@@ -1,0 +1,364 @@
+let balance = 15500;
+let currentCurrency = 'BDT';
+let sessionTotalWon = 0;
+let currentTier = '';
+let registeredCount = 50820;
+
+let pendingApplications = [];
+let pendingDeposits = [];
+let pendingWithdrawals = [];
+let clientNotifications = [];
+let ticketHistory = [];
+let referralCount = 2;
+let referralEarnings = 1000;
+let pendingWdData = null;
+let pendingSignUpData = null;
+
+const countryBanksData = {
+    "Bangladesh": [{ bank: "Eastern Bank PLC", acc: "1011060234567" }, { bank: "bKash Personal", acc: "01994500030" }],
+    "USA": [{ bank: "Chase Bank USA", acc: "US93CHAS123456789" }],
+    "Saudi Arabia": [{ bank: "Al Rajhi Bank", acc: "SA03ALRJ000012345678" }],
+    "UAE": [{ bank: "Emirates NBD", acc: "AE07EBIL000098765432" }]
+};
+
+function scrollToSection(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// 1. Dark / Light Theme Toggle
+function toggleTheme() {
+    const html = document.getElementById('htmlRoot');
+    const icon = document.getElementById('themeIcon');
+    if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        icon.className = "fa-solid fa-sun";
+    } else {
+        html.classList.add('dark');
+        icon.className = "fa-solid fa-moon";
+    }
+}
+
+// 2. Dynamic Language Switcher (Bangla / English)
+const translations = {
+    'bn': {
+        spinBtn: "স্পিন হুইল",
+        balanceLabel: "ব্যালেন্স:",
+        signIn: "সাইন ইন",
+        signUp: "সাইন আপ",
+        admin: "অ্যাডমিন",
+        megaPool: "মেগা প্রাইজ পুল:",
+        heroDesc: "১ম প্যাকেজ শুরু মাত্র ৳১,২৯৯ থেকে! কার্ড স্ক্র্যাচ করে দেখুন আপনার ভাগ্যে কত টাকা রয়েছে।",
+        viewPackages: "প্যাকেজগুলো দেখুন",
+        activeUsers: "অনলাইন অ্যাক্টিভ ইউজার",
+        totalMembers: "মোট রেজিস্টার্ড মেম্বার",
+        refBonus: "রেফারেল বোনাস",
+        pkgTitle: "লটারি কার্ড প্যাকেজসমূহ (৳১,২৯৯ থেকে শুরু)",
+        pkgDesc: "আপনার পছন্দের প্যাকেজ সিলেক্ট করুন এবং আবেদন করুন।"
+    },
+    'en': {
+        spinBtn: "Spin Wheel",
+        balanceLabel: "Balance:",
+        signIn: "Sign In",
+        signUp: "Sign Up",
+        admin: "Admin",
+        megaPool: "Mega Prize Pool:",
+        heroDesc: "1st package starts at only ৳1,299! Scratch cards to win big.",
+        viewPackages: "View Packages",
+        activeUsers: "Online Active Users",
+        totalMembers: "Total Registered Members",
+        refBonus: "Referral Bonus",
+        pkgTitle: "Lottery Card Packages (Starting ৳1,299)",
+        pkgDesc: "Select your preferred package and apply."
+    }
+};
+
+function changeLanguage() {
+    const lang = document.getElementById('langSelector').value;
+    const t = translations[lang];
+    if (!t) return;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.innerText = t[key];
+    });
+}
+
+// 3. Daily Lucky Spin Wheel Simulation
+function openSpinModal() { document.getElementById('spinModal').classList.remove('hidden'); }
+function closeSpinModal() { document.getElementById('spinModal').classList.add('hidden'); }
+
+function spinTheWheel() {
+    const wheel = document.getElementById('wheelBox');
+    const resultText = document.getElementById('spinResultText');
+    wheel.style.transform = "rotate(1440deg)";
+    
+    setTimeout(() => {
+        const prizes = [500, 1000, 2500, 5000, "Free Ticket"];
+        const won = prizes[Math.floor(Math.random() * prizes.length)];
+        if (typeof won === 'number') {
+            balance += won;
+            changeCurrency();
+            resultText.innerText = `🎉 জিতেছে ৳${won}!`;
+            alert(`অভিনন্দন! আপনি স্পিন হুইল থেকে ৳${won} জিতেছেন!`);
+        } else {
+            resultText.innerText = `🎁 ফ্রি টিকিট!`;
+            alert(`অভিনন্দন! আপনি একটি ফ্রি লাকি টিকিট জিতেছেন!`);
+        }
+        wheel.style.transform = "rotate(0deg)";
+        closeSpinModal();
+    }, 1000);
+}
+
+// 4. OTP Verification Simulation
+function triggerSignUpOtp() {
+    const name = document.getElementById('suName').value.trim();
+    const phone = document.getElementById('suPhone').value.trim();
+    const pass = document.getElementById('suPassword').value;
+    const confirmPass = document.getElementById('suConfirmPassword').value;
+
+    if (!name || !phone || !pass || pass !== confirmPass || pass.length < 6) {
+        alert('❌ তথ্য সঠিকভাবে দিন বা পাসওয়ার্ড মেলেনি!');
+        return;
+    }
+    pendingSignUpData = { name, phone };
+    closeSignUpModal();
+    document.getElementById('otpModal').classList.remove('hidden');
+}
+
+function verifyOtpCode() {
+    const code = document.getElementById('otpInput').value;
+    if (code !== "1234") {
+        alert('❌ ভুল ওটিপি কোড! সঠিক কোড (1234) দিন।');
+        return;
+    }
+    document.getElementById('otpModal').classList.add('hidden');
+    document.getElementById('otpInput').value = '';
+
+    if (pendingWdData) {
+        pendingWithdrawals.push(pendingWdData);
+        clientNotifications.push({ title: "উইথড্র পেন্ডিং", message: `৳${pendingWdData.amount} উইথড্র সফলভাবে পেন্ডিং রয়েছে।`, type: 'pending' });
+        updateNotificationBadge();
+        pendingWdData = null;
+        alert('✅ ওটিপি ভেরিফিকেশন সফল! উইথড্র রিকোয়েস্ট সাবমিট হয়েছে।');
+        renderAdminTables();
+    } else if (pendingSignUpData) {
+        alert(`✅ অভিনন্দন ${pendingSignUpData.name}! আপনার অ্যাকাউন্ট সফলভাবে ভেরিফাই ও তৈরি হয়েছে।`);
+        pendingSignUpData = null;
+    }
+}
+
+// Deposit & Withdrawal
+function loadDepositBanks() {
+    const country = document.getElementById('depositCountry').value;
+    const container = document.getElementById('depositBankContainer');
+    const details = document.getElementById('depositBankDetails');
+    if (!country || !countryBanksData[country]) { container.classList.add('hidden'); return; }
+    let html = '';
+    countryBanksData[country].forEach(b => { html += `<p>🏦 ${b.bank} - <span class="text-amber-400 font-mono">${b.acc}</span></p>`; });
+    details.innerHTML = html;
+    container.classList.remove('hidden');
+}
+
+function loadWithdrawBanks() {
+    const country = document.getElementById('withdrawCountry').value;
+    const container = document.getElementById('withdrawBankContainer');
+    const details = document.getElementById('withdrawBankDetails');
+    if (!country || !countryBanksData[country]) { container.classList.add('hidden'); return; }
+    details.innerHTML = `<p class="text-emerald-400">✅ (${country}) ব্যাংক ট্রান্সফার সমর্থিত।</p>`;
+    container.classList.remove('hidden');
+}
+
+function submitDepositRequest() {
+    const country = document.getElementById('depositCountry').value;
+    const amount = document.getElementById('depAmount').value;
+    const trxId = document.getElementById('depTrxId').value.trim();
+    if (!country || !amount || !trxId) { alert('সব তথ্য পূরণ করুন!'); return; }
+    pendingDeposits.push({ country, amount, trxId });
+    clientNotifications.push({ title: "ডিপোজিট পেন্ডিং", message: `৳${amount} ডিপোজিট রিকোয়েস্ট পেন্ডিং।`, type: 'pending' });
+    updateNotificationBadge();
+    alert('ডিপোজিট রিকোয়েস্ট সাবমিট হয়েছে!');
+    renderAdminTables();
+}
+
+function submitWithdrawRequest() {
+    const country = document.getElementById('withdrawCountry').value;
+    const amount = parseInt(document.getElementById('wdAmount').value);
+    const bankName = document.getElementById('wdBankName').value.trim();
+    if (!country || !amount || !bankName || amount > balance) { alert('সঠিক তথ্য বা পর্যাপ্ত ব্যালেন্স নেই!'); return; }
+    
+    balance -= amount;
+    changeCurrency();
+    pendingWdData = { country, amount, bankName };
+    document.getElementById('otpModal').classList.remove('hidden');
+}
+
+// Package Purchase & History
+function openPurchaseModal(pkgName, price, count, tier) {
+    window.tempPkg = { pkgName, price, count, tier };
+    document.getElementById('purchaseModal').classList.remove('hidden');
+}
+function closePurchaseModal() { document.getElementById('purchaseModal').classList.add('hidden'); }
+
+function submitPackageApplication() {
+    const name = document.getElementById('buyerName').value;
+    if (!name) { alert('নাম দিন!'); return; }
+    pendingApplications.push({ name, ...window.tempPkg });
+    alert('আবেদন পাঠানো হয়েছে!');
+    closePurchaseModal();
+    renderAdminTables();
+}
+
+// User Dashboard & VIP Tier
+function openUserDashboard() {
+    document.getElementById('refCount').innerText = referralCount + " জন";
+    document.getElementById('refEarned').innerText = "৳" + referralEarnings.toLocaleString();
+    
+    let histHtml = '';
+    if (ticketHistory.length === 0) {
+        histHtml = `<p class="text-slate-500">কোনো হিস্ট্রি নেই।</p>`;
+    } else {
+        ticketHistory.forEach(h => { histHtml += `<p>✅ ${h.pkg} - জিতিয়েছেন: <strong class="text-emerald-400">৳${h.won}</strong></p>`; });
+    }
+    document.getElementById('ticketHistoryList').innerHTML = histHtml;
+    document.getElementById('userDashboardModal').classList.remove('hidden');
+}
+function closeUserDashboard() { document.getElementById('userDashboardModal').classList.add('hidden'); }
+
+// Admin Tables Render
+function renderAdminTables() {
+    const pTbody = document.getElementById('adminPackageRequestsTable');
+    if (pendingApplications.length > 0) {
+        let h = '';
+        pendingApplications.forEach((app, i) => {
+            h += `<tr><td class="p-2">${app.name}</td><td class="p-2 text-amber-400">${app.pkgName}</td><td class="p-2 text-emerald-400">৳${app.price}</td><td class="p-2 text-right"><button onclick="approvePkg(${i})" class="bg-emerald-600 text-white px-2 py-1 rounded">Success</button> <button onclick="rejectPkg(${i})" class="bg-rose-600 text-white px-2 py-1 rounded">Reject</button></td></tr>`;
+        });
+        pTbody.innerHTML = h;
+    }
+    const dTbody = document.getElementById('adminDepositTable');
+    if (pendingDeposits.length > 0) {
+        let h = '';
+        pendingDeposits.forEach((d, i) => {
+            h += `<tr><td class="p-2">${d.country}</td><td class="p-2 font-mono">${d.trxId}</td><td class="p-2 text-emerald-400">৳${d.amount}</td><td class="p-2 text-right"><button onclick="approveDep(${i})" class="bg-emerald-600 text-white px-2 py-1 rounded">Success</button> <button onclick="rejectDep(${i})" class="bg-rose-600 text-white px-2 py-1 rounded">Reject</button></td></tr>`;
+        });
+        dTbody.innerHTML = h;
+    }
+    const wTbody = document.getElementById('adminWithdrawTable');
+    if (pendingWithdrawals.length > 0) {
+        let h = '';
+        pendingWithdrawals.forEach((w, i) => {
+            h += `<tr><td class="p-2">${w.country}</td><td class="p-2 font-mono">${w.bankName}</td><td class="p-2 text-amber-400">৳${w.amount}</td><td class="p-2 text-right"><button onclick="approveWd(${i})" class="bg-emerald-600 text-white px-2 py-1 rounded">Success</button> <button onclick="rejectWd(${i})" class="bg-rose-600 text-white px-2 py-1 rounded">Reject</button></td></tr>`;
+        });
+        wTbody.innerHTML = h;
+    }
+}
+
+function approvePkg(i) {
+    const app = pendingApplications[i];
+    pendingApplications.splice(i, 1);
+    renderAdminTables();
+    clientNotifications.push({ title: "প্যাকেজ সফল", message: `"${app.pkgName}" অনুমোদিত হয়েছে।`, type: 'success', pkgData: app });
+    updateNotificationBadge();
+    alert('প্যাকেজ অ্যাপ্রুভ হয়েছে!');
+}
+function rejectPkg(i) { pendingApplications.splice(i, 1); renderAdminTables(); alert('রিজেক্ট করা হয়েছে!'); }
+
+function approveDep(i) {
+    balance += parseInt(pendingDeposits[i].amount);
+    changeCurrency();
+    pendingDeposits.splice(i, 1);
+    renderAdminTables();
+    alert('ডিপোজিট সফল!');
+}
+function rejectDep(i) { pendingDeposits.splice(i, 1); renderAdminTables(); alert('ডিপোজিট রিজেক্ট!'); }
+
+function approveWd(i) { pendingWithdrawals.splice(i, 1); renderAdminTables(); alert('উইথড্র সফল!'); }
+function rejectWd(i) {
+    balance += parseInt(pendingWithdrawals[i].amount);
+    changeCurrency();
+    pendingWithdrawals.splice(i, 1);
+    renderAdminTables();
+    alert('উইথড্র রিজেক্ট ও রিফান্ড!');
+}
+
+function updateNotificationBadge() {
+    const b = document.getElementById('notifBadge');
+    b.innerText = clientNotifications.length;
+    b.classList.remove('hidden');
+}
+
+function openClientNotifications() {
+    let html = '';
+    clientNotifications.forEach(n => {
+        if (n.type === 'success' && n.pkgData) {
+            html += `<div onclick='launchGame(${JSON.stringify(n.pkgData)})' class="bg-emerald-950 p-3 rounded-xl cursor-pointer"><strong class="text-emerald-400">${n.title}</strong><p>${n.message}</p><span class="text-amber-400 underline">▶️ খেলতে ক্লিক করুন</span></div>`;
+        } else {
+            html += `<div class="bg-slate-950 p-3 rounded-xl"><strong class="text-amber-400">${n.title}</strong><p>${n.message}</p></div>`;
+        }
+    });
+    document.getElementById('clientNotifList').innerHTML = html;
+    document.getElementById('clientNotifModal').classList.remove('hidden');
+}
+function closeClientNotifications() { document.getElementById('clientNotifModal').classList.add('hidden'); }
+
+function launchGame(app) {
+    closeClientNotifications();
+    selectPackage(app.pkgName, app.price, app.count, app.tier);
+}
+
+function selectPackage(name, price, count, tier) {
+    document.getElementById('activePkgName').innerText = `${name} (${count}টি কার্ড)`;
+    document.getElementById('activePkgPrice').innerText = "৳" + price;
+    let grid = '';
+    for (let i = 1; i <= count; i++) {
+        let prize = Math.random() > 0.4 ? "৳" + (Math.floor(Math.random() * 500000) + 50000).toLocaleString() : "পরের বার চেষ্টা করুন";
+        grid += `<div onclick="revealCard(this, '${prize}', '${name}')" class="bg-slate-900 border border-slate-700 h-24 rounded-xl flex flex-col items-center justify-center p-2 text-center cursor-pointer"><span class="text-xs text-amber-400">কার্ড #${i}</span><span class="text-xs text-slate-400 card-content">স্ক্র্যাচ</span></div>`;
+    }
+    document.getElementById('packageCardsGrid').innerHTML = grid;
+    document.getElementById('mainContainer').classList.add('hidden');
+    document.getElementById('checkoutView').classList.remove('hidden');
+}
+
+function revealCard(el, prize, pkgName) {
+    el.querySelector('.card-content').innerText = prize;
+    if (!prize.includes("পরের বার")) {
+        let clean = parseInt(prize.replace(/[৳,]/g, ''));
+        balance += clean;
+        sessionTotalWon = (sessionTotalWon || 0) + clean;
+        ticketHistory.push({ pkg: pkgName, won: clean.toLocaleString() });
+        changeCurrency();
+    }
+}
+
+function showMainView() {
+    document.getElementById('checkoutView').classList.add('hidden');
+    document.getElementById('mainContainer').classList.remove('hidden');
+}
+
+function openFinalCertificate() {
+    document.getElementById('certPrizeAmount').innerText = "৳" + (sessionTotalWon || 0).toLocaleString();
+    document.getElementById('certVerifyId').innerText = "LOTTO-" + Math.floor(10000 + Math.random() * 90000);
+    document.getElementById('certificateModal').classList.remove('hidden');
+}
+function closeCertificate() { document.getElementById('certificateModal').classList.add('hidden'); }
+
+const rates = { 'BDT': { rate: 1, symbol: '৳' }, 'USD': { rate: 0.0083, symbol: '$' }, 'SAR': { rate: 0.031, symbol: 'SAR ' }, 'AED': { rate: 0.030, symbol: 'AED ' } };
+function changeCurrency() {
+    currentCurrency = document.getElementById('currencySelector').value;
+    const cfg = rates[currentCurrency];
+    document.getElementById('userBalance').innerText = cfg.symbol + Math.round(balance * cfg.rate).toLocaleString();
+}
+
+function openSignUpModal() { document.getElementById('signUpModal').classList.remove('hidden'); }
+function closeSignUpModal() { document.getElementById('signUpModal').classList.add('hidden'); }
+function openSignInModal() { document.getElementById('signInModal').classList.remove('hidden'); }
+function closeSignInModal() { document.getElementById('signInModal').classList.add('hidden'); }
+function openAdminLoginModal() { document.getElementById('adminLoginModal').classList.remove('hidden'); }
+function closeAdminLoginModal() { document.getElementById('adminLoginModal').classList.add('hidden'); }
+function verifyAdminPassword() {
+    if (document.getElementById('adminPasswordInput').value === 'Mehedi12@#') {
+        closeAdminLoginModal();
+        document.getElementById('adminModal').classList.remove('hidden');
+        renderAdminTables();
+    } else { alert('ভুল পাসওয়ার্ড!'); }
+}
+function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+function handleSignIn() { alert('লগইন সফল!'); closeSignInModal(); }
